@@ -1,0 +1,199 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap');
+@import 'leaflet/dist/leaflet.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* UDSM Global Readership Dashboard — Light Theme Design System */
+
+@layer base {
+  :root {
+    /* UDSM Brand */
+    --udsm-blue: 210 100% 20%;
+    --udsm-blue-light: 210 70% 45%;
+    --udsm-gold: 42 100% 50%;
+    --udsm-gold-light: 42 100% 65%;
+
+    /* Light Theme */
+    --background: 210 20% 98%;
+    --foreground: 215 25% 15%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 215 25% 15%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 215 25% 15%;
+
+    --primary: 210 100% 20%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 42 100% 50%;
+    --secondary-foreground: 215 25% 10%;
+
+    --muted: 210 15% 94%;
+    --muted-foreground: 215 15% 48%;
+
+    --accent: 210 20% 93%;
+    --accent-foreground: 215 25% 15%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 210 15% 90%;
+    --input: 210 15% 90%;
+    --ring: 210 100% 20%;
+
+    --radius: 0.625rem;
+
+    /* Dashboard specific */
+    --glow-gold: 0 0 20px hsl(42 100% 50% / 0.15);
+    --glow-blue: 0 0 20px hsl(210 100% 40% / 0.12);
+    --gradient-gold: linear-gradient(135deg, hsl(42 100% 50%) 0%, hsl(42 100% 65%) 100%);
+    --gradient-blue: linear-gradient(135deg, hsl(210 100% 20%) 0%, hsl(210 70% 45%) 100%);
+
+    /* Map colors — light */
+    --map-bg: 210 20% 96%;
+    --map-land: 210 15% 88%;
+    --map-border: 210 10% 80%;
+    --heat-low: 210 60% 60%;
+    --heat-medium: 42 100% 50%;
+    --heat-high: 15 90% 52%;
+
+    /* Sidebar */
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 215 25% 15%;
+    --sidebar-primary: 210 100% 20%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 210 20% 96%;
+    --sidebar-accent-foreground: 215 25% 15%;
+    --sidebar-border: 210 15% 90%;
+    --sidebar-ring: 210 100% 40%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Playfair Display', serif;
+  }
+}
+
+/* Component classes */
+
+@layer components {
+  .glass-card {
+    @apply bg-card border border-border rounded-xl;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+  }
+  .glass-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.04);
+  }
+
+  .metric-card {
+    @apply glass-card p-6 relative overflow-hidden transition-shadow duration-300;
+  }
+
+  .glow-gold {
+    box-shadow: var(--glow-gold);
+  }
+  .glow-blue {
+    box-shadow: var(--glow-blue);
+  }
+
+  .text-gradient-gold {
+    background: var(--gradient-gold);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .text-gradient-blue {
+    background: var(--gradient-blue);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .pulse-dot {
+    @apply relative;
+  }
+  .pulse-dot::before {
+    content: '';
+    @apply absolute w-2 h-2 bg-green-500 rounded-full;
+    animation: pulse-ring 1.5s cubic-bezier(0.455, 0.03, 0.515, 0.955) infinite;
+  }
+  .pulse-dot::after {
+    content: '';
+    @apply absolute w-2 h-2 bg-green-400 rounded-full;
+  }
+  @keyframes pulse-ring {
+    0% { transform: scale(1); opacity: 1; }
+    100% { transform: scale(2.5); opacity: 0; }
+  }
+
+  .activity-item {
+    @apply glass-card p-4 flex items-center gap-4 transition-all duration-300;
+  }
+  .activity-item:hover {
+    @apply translate-x-1;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  }
+
+  .map-container {
+    @apply relative rounded-2xl overflow-hidden border border-border bg-card;
+  }
+
+  .country-highlight {
+    animation: country-pulse 2s ease-in-out infinite;
+  }
+  @keyframes country-pulse {
+    0%, 100% { opacity: 0.7; }
+    50% { opacity: 1; }
+  }
+
+  .counter-digit {
+    @apply inline-block tabular-nums;
+    animation: count-up 0.3s ease-out;
+  }
+  @keyframes count-up {
+    from { transform: translateY(20%); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  .live-indicator {
+    @apply flex items-center gap-2 text-sm font-medium text-green-600;
+  }
+  .live-indicator::before {
+    content: '';
+    @apply w-2 h-2 bg-green-500 rounded-full;
+    animation: blink 1s ease-in-out infinite;
+  }
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  .floating-stat {
+    animation: float 6s ease-in-out infinite;
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+  }
+}
+
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
