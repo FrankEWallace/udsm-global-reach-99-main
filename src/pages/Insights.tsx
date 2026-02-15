@@ -126,11 +126,11 @@ const InsightsPage = () => {
               >
                 <div className={`p-1.5 rounded-lg transition-colors duration-200
                   ${isActive ? 'bg-[#235dcb]/20' : 'bg-transparent'}`}>
-                  <Icon className={`w-4 h-4 ${isActive ? 'text-[#5b8edb]' : 'text-udsm-blue'}`} />
+                  <Icon className="w-4 h-4 text-white" />
                 </div>
                 {!collapsed && <span>{label}</span>}
                 {isActive && !collapsed && (
-                  <div className="ml-auto w-1.5 h-1.5 rounded-full bg-[#5b8edb]" />
+                  <div className="ml-auto w-1.5 h-1.5 rounded-full bg-white" />
                 )}
               </button>
             );
@@ -252,7 +252,7 @@ function InsightCard({ item }: { item: InsightItem }) {
     <div className={`${c.bg} ${c.border} border rounded-xl p-4 transition-all hover:shadow-md`}>
       <div className="flex items-start gap-3">
         <div className={`p-2 rounded-lg ${c.badge}`}>
-          <Icon className="w-4 h-4" />
+          <Icon className="w-4 h-4 text-white" />
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
@@ -310,7 +310,7 @@ function SectionHeader({ title, subtitle, icon: Icon }: { title: string; subtitl
   return (
     <div className="flex items-center gap-3 mb-6">
       <div className="p-2.5 rounded-xl bg-gradient-to-br from-[#235dcb] to-[#2f6fd9] shadow-lg">
-        <Icon className="w-5 h-5 text-[#5b8edb]" />
+        <Icon className="w-5 h-5 text-white" />
       </div>
       <div>
         <h3 className="font-heading text-xl font-bold text-[#235dcb]">{title}</h3>
@@ -495,7 +495,7 @@ function LiveCounter({ label, value, icon, color }: { label: string; value: numb
     <div className="text-center">
       <div className="flex items-center justify-center mb-2">
         <div className="p-2 rounded-lg" style={{ backgroundColor: `${color}20` }}>
-          <span style={{ color }}>{icon}</span>
+          <span className="text-white">{icon}</span>
         </div>
       </div>
       <p className="text-2xl font-bold text-white tabular-nums">
