@@ -41,22 +41,22 @@ export function JournalSelector({
         onValueChange={(value) => onJournalChange(value === 'all' ? null : parseInt(value, 10))}
         disabled={isLoading}
       >
-        <SelectTrigger className="w-[280px] bg-white border-slate-200">
-          <SelectValue placeholder="Select journal..." />
+        <SelectTrigger className="w-[320px] max-w-[400px] bg-white border-slate-200">
+          <SelectValue placeholder="Select journal..." className="truncate" />
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all">
             <div className="flex items-center gap-2">
-              <Layers className="h-4 w-4 text-udsm-navy" />
+              <Layers className="h-4 w-4 text-udsm-navy flex-shrink-0" />
               <span className="font-medium">All Journals (Aggregated)</span>
             </div>
           </SelectItem>
           {contexts.map((ctx) => (
             <SelectItem key={ctx.id} value={ctx.id.toString()}>
-              <div className="flex items-center gap-2">
-                <Building2 className="h-4 w-4 text-slate-500" />
-                <span>{getContextName(ctx)}</span>
-                <span className="text-xs text-muted-foreground">({ctx.urlPath})</span>
+              <div className="flex items-center gap-2 max-w-[350px]">
+                <Building2 className="h-4 w-4 text-slate-500 flex-shrink-0" />
+                <span className="truncate">{getContextName(ctx)}</span>
+                <span className="text-xs text-muted-foreground flex-shrink-0">({ctx.urlPath})</span>
               </div>
             </SelectItem>
           ))}

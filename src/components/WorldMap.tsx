@@ -1,209 +1,469 @@
 /**
- * Interactive World Map using Leaflet
- * Shows real-time visitor locations from Matomo Analytics
+ * Beautiful World Map using react-simple-maps
+ * Clean, minimal SVG-based choropleth visualization
+ * Shows visitor density by country with smooth interactions
  */
-import { useEffect, useRef } from 'react';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
+import { useState, useMemo, memo, useEffect } from 'react';
+import {
+  ComposableMap,
+  Geographies,
+  Geography,
+  Marker,
+  ZoomableGroup,
+} from 'react-simple-maps';
+import { scaleLinear } from 'd3-scale';
 import { useMatomoCountries } from '@/hooks/useMatomoData';
+import { Globe, Users, Eye, Clock, MapPin } from 'lucide-react';
 
-// Fix for default marker icons in Leaflet
-import icon from 'leaflet/dist/images/marker-icon.png';
-import iconShadow from 'leaflet/dist/images/marker-shadow.png';
+// Natural Earth TopoJSON - Clean country boundaries (hosted CDN)
+const GEO_URL = 'https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json';
 
-const DefaultIcon = L.icon({
-  iconUrl: icon,
-  shadowUrl: iconShadow,
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-});
-
-L.Marker.prototype.options.icon = DefaultIcon;
-
-// Country coordinates (capital cities for markers)
-const countryCoordinates: Record<string, { lat: number; lng: number }> = {
-  us: { lat: 38.9072, lng: -77.0369 },
-  gb: { lat: 51.5074, lng: -0.1278 },
-  de: { lat: 52.5200, lng: 13.4050 },
-  fr: { lat: 48.8566, lng: 2.3522 },
-  ca: { lat: 45.4215, lng: -75.6972 },
-  au: { lat: -35.2809, lng: 149.1300 },
-  jp: { lat: 35.6762, lng: 139.6503 },
-  cn: { lat: 39.9042, lng: 116.4074 },
-  in: { lat: 28.6139, lng: 77.2090 },
-  br: { lat: -15.8267, lng: -47.9218 },
-  mx: { lat: 19.4326, lng: -99.1332 },
-  za: { lat: -25.7479, lng: 28.2293 },
-  ng: { lat: 9.0765, lng: 7.3986 },
-  ke: { lat: -1.2921, lng: 36.8219 },
-  tz: { lat: -6.7924, lng: 39.2083 },
-  ug: { lat: 0.3476, lng: 32.5825 },
-  gh: { lat: 5.6037, lng: -0.1870 },
-  eg: { lat: 30.0444, lng: 31.2357 },
-  sa: { lat: 24.7136, lng: 46.6753 },
-  ru: { lat: 55.7558, lng: 37.6173 },
-  it: { lat: 41.9028, lng: 12.4964 },
-  es: { lat: 40.4168, lng: -3.7038 },
-  nl: { lat: 52.3676, lng: 4.9041 },
-  se: { lat: 59.3293, lng: 18.0686 },
-  no: { lat: 59.9139, lng: 10.7522 },
-  pl: { lat: 52.2297, lng: 21.0122 },
-  ch: { lat: 46.9480, lng: 7.4474 },
-  be: { lat: 50.8503, lng: 4.3517 },
-  at: { lat: 48.2082, lng: 16.3738 },
-  dk: { lat: 55.6761, lng: 12.5683 },
-  sg: { lat: 1.3521, lng: 103.8198 },
-  my: { lat: 3.1390, lng: 101.6869 },
-  th: { lat: 13.7563, lng: 100.5018 },
-  ph: { lat: 14.5995, lng: 120.9842 },
-  id: { lat: -6.2088, lng: 106.8456 },
-  vn: { lat: 21.0285, lng: 105.8542 },
-  pk: { lat: 33.6844, lng: 73.0479 },
-  bd: { lat: 23.8103, lng: 90.4125 },
-  nz: { lat: -41.2865, lng: 174.7762 },
-  ar: { lat: -34.6037, lng: -58.3816 },
-  cl: { lat: -33.4489, lng: -70.6693 },
-  co: { lat: 4.7110, lng: -74.0721 },
-  pe: { lat: -12.0464, lng: -77.0428 },
-  il: { lat: 31.7683, lng: 35.2137 },
-  tr: { lat: 39.9334, lng: 32.8597 },
-  ua: { lat: 50.4501, lng: 30.5234 },
-  ro: { lat: 44.4268, lng: 26.1025 },
-  cz: { lat: 50.0755, lng: 14.4378 },
-  gr: { lat: 37.9838, lng: 23.7275 },
-  pt: { lat: 38.7223, lng: -9.1393 },
-  hu: { lat: 47.4979, lng: 19.0402 },
-  ie: { lat: 53.3498, lng: -6.2603 },
-  fi: { lat: 60.1699, lng: 24.9384 },
+// Country flag emoji helper
+const getCountryFlag = (countryCode: string) => {
+  if (!countryCode || countryCode.length !== 2) return '🌍';
+  const code = countryCode.toUpperCase();
+  const offset = 127397;
+  return String.fromCodePoint(code.charCodeAt(0) + offset, code.charCodeAt(1) + offset);
 };
 
+// Format number with K/M suffix
+const formatNumber = (num: number) => {
+  if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
+  if (num >= 1000) return `${(num / 1000).toFixed(1)}K`;
+  return num.toString();
+};
+
+// Gray/Light Blue color palette (matching DownloadsMapWidget)
+const colorPalette = {
+  noData: '#cbd5e1',       // Light gray for all countries
+  stroke: '#94a3b8',       // Blue-gray stroke
+  hover: '#b8c5d6',        // Light blue-gray hover
+  highlight: '#3b82f6',    // Blue highlight
+  base: '#001d3d',         // UDSM Navy
+  ocean: '#e8f0f4',        // Light blue ocean background
+  gradient: [
+    '#e0f2fe',  // Lightest blue
+    '#bae6fd',
+    '#7dd3fc',
+    '#38bdf8',
+    '#0ea5e9',
+    '#0284c7',
+    '#0369a1',
+    '#075985',
+    '#0c4a6e',
+    '#001d3d',  // UDSM Navy (most visitors)
+  ],
+};
+
+// Country coordinates for markers
+const countryCoordinates: Record<string, [number, number]> = {
+  us: [-95.7, 37.1], gb: [-1.17, 52.35], de: [10.45, 51.16], fr: [2.21, 46.23],
+  ca: [-106.35, 56.13], au: [133.77, -25.27], jp: [138.25, 36.2], cn: [104.19, 35.86],
+  in: [78.96, 20.59], br: [-51.92, -14.23], mx: [-102.55, 23.63], za: [22.94, -30.56],
+  ng: [8.67, 9.08], ke: [37.91, -0.02], tz: [34.89, -6.37], ug: [32.29, 1.37],
+  gh: [-1.02, 7.95], eg: [30.8, 26.82], sa: [45.08, 23.88], ru: [105.32, 61.52],
+  it: [12.57, 41.87], es: [-3.75, 40.46], nl: [5.29, 52.13], se: [18.64, 60.13],
+  no: [8.47, 60.47], pl: [19.15, 51.92], ch: [8.23, 46.82], be: [4.47, 50.5],
+  at: [14.55, 47.52], dk: [9.5, 56.26], sg: [103.82, 1.35], my: [101.97, 4.21],
+  th: [100.99, 15.87], ph: [121.77, 12.88], id: [113.92, -0.79], vn: [108.28, 14.06],
+  pk: [69.35, 30.38], bd: [90.36, 23.68], nz: [174.89, -40.9], ar: [-63.62, -38.42],
+  cl: [-71.54, -35.68], co: [-74.3, 4.57], pe: [-75.02, -9.19], tr: [35.24, 38.96],
+  ae: [53.85, 23.42], rw: [29.87, -1.94], et: [40.49, 9.15], mw: [34.3, -13.25],
+  zm: [27.85, -13.13], zw: [29.15, -19.02], bw: [24.68, -22.33], na: [18.49, -22.96],
+  mz: [35.53, -18.66], ao: [17.87, -11.2], cd: [21.76, -4.04], cm: [12.35, 7.37],
+  sn: [-14.45, 14.5], ci: [-5.55, 7.54], ml: [-4, 17.57], bf: [-1.56, 12.24],
+  ne: [8.08, 17.61], td: [18.73, 15.45], sd: [30.22, 12.86], ly: [17.23, 26.34],
+  dz: [1.66, 28.03], ma: [-7.09, 31.79], tn: [9.54, 33.89],
+};
+
+// Country name mappings from ISO numeric to Matomo codes
+const countryIdToCode: Record<string, string> = {
+  '840': 'us', '826': 'gb', '276': 'de', '250': 'fr', '124': 'ca', '036': 'au',
+  '392': 'jp', '156': 'cn', '356': 'in', '076': 'br', '484': 'mx', '710': 'za',
+  '566': 'ng', '404': 'ke', '834': 'tz', '800': 'ug', '288': 'gh', '818': 'eg',
+  '682': 'sa', '643': 'ru', '380': 'it', '724': 'es', '528': 'nl', '752': 'se',
+  '578': 'no', '616': 'pl', '756': 'ch', '056': 'be', '040': 'at', '208': 'dk',
+  '702': 'sg', '458': 'my', '764': 'th', '608': 'ph', '360': 'id', '704': 'vn',
+  '586': 'pk', '050': 'bd', '554': 'nz', '032': 'ar', '152': 'cl', '170': 'co',
+  '604': 'pe', '376': 'il', '792': 'tr', '804': 'ua', '642': 'ro', '203': 'cz',
+  '300': 'gr', '620': 'pt', '348': 'hu', '372': 'ie', '246': 'fi', '442': 'lu',
+  '191': 'hr', '705': 'si', '703': 'sk', '100': 'bg', '233': 'ee', '428': 'lv',
+  '440': 'lt', '499': 'me', '688': 'rs', '008': 'al', '807': 'mk', '070': 'ba',
+  '112': 'by', '498': 'md', '268': 'ge', '051': 'am', '031': 'az', '398': 'kz',
+  '860': 'uz', '762': 'tj', '417': 'kg', '795': 'tm', '496': 'mn', '410': 'kr',
+  '408': 'kp', '158': 'tw', '344': 'hk', '446': 'mo', '144': 'lk', '524': 'np',
+  '064': 'bt', '462': 'mv', '004': 'af', '364': 'ir', '368': 'iq', '760': 'sy',
+  '400': 'jo', '422': 'lb', '275': 'ps', '784': 'ae', '414': 'kw', '048': 'bh',
+  '634': 'qa', '512': 'om', '887': 'ye', '012': 'dz', '504': 'ma', '788': 'tn',
+  '434': 'ly', '729': 'sd', '728': 'ss', '231': 'et', '232': 'er', '262': 'dj',
+  '706': 'so', '646': 'rw', '108': 'bi', '180': 'cd', '178': 'cg', '266': 'ga',
+  '226': 'gq', '120': 'cm', '140': 'cf', '148': 'td', '562': 'ne', '466': 'ml',
+  '854': 'bf', '686': 'sn', '270': 'gm', '624': 'gw', '384': 'ci', '430': 'lr',
+  '694': 'sl', '324': 'gn', '768': 'tg', '204': 'bj', '508': 'mz', '894': 'zm',
+  '716': 'zw', '072': 'bw', '516': 'na', '024': 'ao', '454': 'mw', '450': 'mg',
+  '174': 'km', '480': 'mu', '690': 'sc', '858': 'uy', '600': 'py', '068': 'bo',
+  '218': 'ec', '862': 've', '328': 'gy', '740': 'sr', '254': 'gf', '591': 'pa',
+  '188': 'cr', '558': 'ni', '340': 'hn', '222': 'sv', '320': 'gt', '084': 'bz',
+  '192': 'cu', '332': 'hi', '214': 'do', '630': 'pr', '388': 'jm', '044': 'bs',
+  '052': 'bb', '780': 'tt', '308': 'gd', '670': 'vc', '662': 'lc', '212': 'dm',
+  '028': 'ag', '659': 'kn', '352': 'is', '234': 'fo', '304': 'gl',
+};
+
+interface TooltipData {
+  name: string;
+  countryCode: string;
+  visits: number;
+  visitors: number;
+  actions: number;
+  x: number;
+  y: number;
+}
+
 const WorldMap = () => {
-  const mapRef = useRef<HTMLDivElement>(null);
-  const mapInstanceRef = useRef<L.Map | null>(null);
-  const markersRef = useRef<L.CircleMarker[]>([]);
-  
-  const { data: countries } = useMatomoCountries('day', 'today');
+  const { data: countries = [], isLoading, error } = useMatomoCountries();
+  const [tooltipData, setTooltipData] = useState<TooltipData | null>(null);
+  const [zoom, setZoom] = useState(1);
+  const [center, setCenter] = useState<[number, number]>([0, 20]);
+  const [activeIndex, setActiveIndex] = useState(0);
 
-  useEffect(() => {
-    if (!mapRef.current || mapInstanceRef.current) return;
-
-    // Initialize map
-    const map = L.map(mapRef.current, {
-      center: [20, 0],
-      zoom: 2,
-      minZoom: 2,
-      maxZoom: 6,
-      zoomControl: true,
-      attributionControl: false,
-    });
-
-    // Add tile layer (CartoDB Positron - clean and modern)
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-      subdomains: 'abcd',
-      maxZoom: 19,
-    }).addTo(map);
-
-    mapInstanceRef.current = map;
-
-    return () => {
-      if (mapInstanceRef.current) {
-        mapInstanceRef.current.remove();
-        mapInstanceRef.current = null;
-      }
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!mapInstanceRef.current || !countries || countries.length === 0) return;
-
-    // Clear existing markers
-    markersRef.current.forEach(marker => marker.remove());
-    markersRef.current = [];
-
-    // Get max visits for scaling
-    const maxVisits = Math.max(...countries.map(c => c.nb_visits));
-
-    // Add markers for each country with visitors
+  // Build country data lookup by ISO numeric code and by alpha-2 code
+  const countryDataMap = useMemo(() => {
+    const map = new Map<string, { visits: number; visitors: number; actions: number; label: string; code: string }>();
+    
     countries.forEach(country => {
-      const countryCode = country.code?.toLowerCase();
-      const coords = countryCode ? countryCoordinates[countryCode] : null;
-      
-      if (!coords) return;
-
-      // Calculate radius based on visitor count
-      const radius = Math.max(5, Math.min(30, (country.nb_visits / maxVisits) * 30));
-      
-      // Calculate color intensity based on visitor count
-      const intensity = country.nb_visits / maxVisits;
-      const color = intensity > 0.7 ? '#dc2626' : intensity > 0.4 ? '#f59e0b' : '#3b82f6';
-      
-      // Create circle marker
-      const marker = L.circleMarker([coords.lat, coords.lng], {
-        radius: radius,
-        fillColor: color,
-        color: '#fff',
-        weight: 2,
-        opacity: 0.8,
-        fillOpacity: 0.6,
-      }).addTo(mapInstanceRef.current!);
-
-      // Add popup
-      marker.bindPopup(`
-        <div style="padding: 8px; min-width: 150px;">
-          <div style="font-weight: 600; font-size: 14px; margin-bottom: 4px;">${country.label}</div>
-          <div style="font-size: 12px; color: #666;">
-            <strong>${country.nb_visits.toLocaleString()}</strong> visits<br/>
-            <strong>${country.nb_actions.toLocaleString()}</strong> actions<br/>
-            <strong>${country.nb_uniq_visitors.toLocaleString()}</strong> unique visitors
-          </div>
-        </div>
-      `);
-
-      // Hover effect
-      marker.on('mouseover', function() {
-        this.setStyle({
-          fillOpacity: 0.9,
-          weight: 3,
+      const code = country.code?.toLowerCase() || '';
+      if (code) {
+        // Store by alpha-2 code
+        map.set(code, {
+          visits: country.nb_visits || 0,
+          visitors: country.nb_uniq_visitors || 0,
+          actions: country.nb_actions || 0,
+          label: country.label || '',
+          code: code,
         });
-      });
-
-      marker.on('mouseout', function() {
-        this.setStyle({
-          fillOpacity: 0.6,
-          weight: 2,
-        });
-      });
-
-      markersRef.current.push(marker);
+      }
     });
+    
+    return map;
   }, [countries]);
 
+  // Calculate max visits for color scale
+  const maxVisits = useMemo(() => {
+    if (countries.length === 0) return 100;
+    return Math.max(...countries.map(c => c.nb_visits || 0), 1);
+  }, [countries]);
+
+  // Marker locations from countries with visits - Real-time data only
+  const markerLocations = useMemo(() => {
+    const locations = countries
+      .filter(c => c.code && countryCoordinates[c.code.toLowerCase()] && c.nb_visits > 0)
+      .map(c => ({
+        code: c.code!.toLowerCase(),
+        coordinates: countryCoordinates[c.code!.toLowerCase()],
+        visits: c.nb_visits || 0,
+        label: c.label,
+      }))
+      .slice(0, 30);
+    
+    // Return actual data only - no fallback demo data
+    return locations;
+  }, [countries]);
+
+  // Auto-rotate through countries
+  useEffect(() => {
+    if (markerLocations.length <= 1) return;
+    
+    const interval = setInterval(() => {
+      setActiveIndex(prev => (prev + 1) % markerLocations.length);
+    }, 3000); // Rotate every 3 seconds
+    
+    return () => clearInterval(interval);
+  }, [markerLocations.length]);
+
+  // Color scale function
+  const getCountryColor = (visits: number) => {
+    if (visits === 0) return colorPalette.noData;
+    
+    const scale = scaleLinear<string>()
+      .domain([0, maxVisits * 0.05, maxVisits * 0.15, maxVisits * 0.3, maxVisits * 0.5, maxVisits])
+      .range([colorPalette.gradient[1], colorPalette.gradient[3], colorPalette.gradient[5], colorPalette.gradient[7], colorPalette.gradient[8], colorPalette.gradient[9]])
+      .clamp(true);
+    
+    return scale(visits);
+  };
+
+  // Get country data from geography
+  const getCountryData = (geo: any) => {
+    const numericId = geo.id;
+    const alpha2 = countryIdToCode[numericId];
+    if (alpha2) {
+      return countryDataMap.get(alpha2);
+    }
+    return null;
+  };
+
+  // Handle mouse events
+  const handleMouseEnter = (geo: any, event: React.MouseEvent) => {
+    const data = getCountryData(geo);
+    const countryName = geo.properties?.name || 'Unknown';
+    
+    if (data && data.visits > 0) {
+      setTooltipData({
+        name: data.label || countryName,
+        countryCode: data.code,
+        visits: data.visits,
+        visitors: data.visitors,
+        actions: data.actions,
+        x: event.clientX,
+        y: event.clientY,
+      });
+    }
+  };
+
+  const handleMouseLeave = () => {
+    setTooltipData(null);
+  };
+
+  const handleMouseMove = (event: React.MouseEvent) => {
+    if (tooltipData) {
+      setTooltipData(prev => prev ? { ...prev, x: event.clientX, y: event.clientY } : null);
+    }
+  };
+
+  // Zoom controls
+  const handleZoomIn = () => setZoom(z => Math.min(z * 1.5, 8));
+  const handleZoomOut = () => setZoom(z => Math.max(z / 1.5, 1));
+  const handleReset = () => {
+    setZoom(1);
+    setCenter([0, 20]);
+  };
+
+  if (error) {
+    return (
+      <div className="h-[400px] flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl">
+        <div className="text-center text-slate-400">
+          <Globe className="w-12 h-12 mx-auto mb-3 opacity-30" />
+          <p className="text-sm font-medium">Unable to load map data</p>
+          <p className="text-xs mt-1">{error.message}</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="glass-card p-0 overflow-hidden rounded-xl">
-      <div 
-        ref={mapRef} 
-        style={{ 
-          height: '500px', 
-          width: '100%',
-          borderRadius: '0.75rem',
-        }} 
-      />
-      <style>{`
-        .leaflet-container {
-          border-radius: 0.75rem;
-          background: linear-gradient(to bottom, #e0f2fe, #f0f9ff);
-        }
-        .leaflet-popup-content-wrapper {
-          border-radius: 8px;
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        }
-        .leaflet-popup-tip {
-          background: white;
-        }
-      `}</style>
+    <div className="relative bg-gradient-to-b from-[#e8f0f4] to-[#d8e4ed] rounded-xl overflow-hidden border border-gray-100">
+      {/* Loading overlay */}
+      {isLoading && (
+        <div className="absolute inset-0 bg-white/80 backdrop-blur-sm z-20 flex items-center justify-center">
+          <div className="text-center">
+            <div className="w-10 h-10 border-3 border-[#001d3d] border-t-transparent rounded-full animate-spin mx-auto mb-3" style={{ borderWidth: '3px' }} />
+            <p className="text-sm text-slate-600">Loading map data...</p>
+          </div>
+        </div>
+      )}
+
+      {/* Map Container */}
+      <div className="h-[400px] relative overflow-hidden" onMouseMove={handleMouseMove}>
+        <ComposableMap
+          projection="geoMercator"
+          projectionConfig={{
+            scale: 140,
+            center: [0, 25],
+          }}
+          style={{
+            width: '100%',
+            height: '100%',
+            backgroundColor: colorPalette.ocean,
+            touchAction: 'none',
+          }}
+        >
+          <ZoomableGroup
+            zoom={zoom}
+            center={center}
+            onMoveEnd={({ coordinates, zoom: z }) => {
+              setCenter(coordinates as [number, number]);
+              setZoom(z);
+            }}
+            minZoom={1}
+            maxZoom={8}
+            translateExtent={[[-200, -100], [1200, 700]]}
+          >
+            <Geographies geography={GEO_URL}>
+              {({ geographies }) =>
+                geographies.map((geo) => {
+                  const data = getCountryData(geo);
+                  const visits = data?.visits || 0;
+                  const isHovered = tooltipData?.countryCode === data?.code;
+
+                  return (
+                    <Geography
+                      key={geo.rsmKey}
+                      geography={geo}
+                      fill={isHovered ? colorPalette.hover : colorPalette.noData}
+                      stroke={isHovered && visits > 0 ? colorPalette.highlight : colorPalette.stroke}
+                      strokeWidth={isHovered && visits > 0 ? 0.8 : 0.3}
+                      style={{
+                        default: { 
+                          outline: 'none', 
+                          transition: 'all 0.25s ease-out',
+                        },
+                        hover: { 
+                          outline: 'none', 
+                          cursor: visits > 0 ? 'pointer' : 'default',
+                          fill: visits > 0 ? colorPalette.hover : colorPalette.noData,
+                          stroke: visits > 0 ? colorPalette.highlight : colorPalette.stroke,
+                          strokeWidth: visits > 0 ? 0.8 : 0.3,
+                        },
+                        pressed: { outline: 'none' },
+                      }}
+                      onMouseEnter={(event) => handleMouseEnter(geo, event)}
+                      onMouseLeave={handleMouseLeave}
+                    />
+                  );
+                })
+              }
+            </Geographies>
+
+            {/* Live visitor dots */}
+            {markerLocations.length > 0 && markerLocations.map((location, idx) => {
+              const isActive = idx === activeIndex;
+              const isHovered = tooltipData?.countryCode === location.code;
+              // Larger dots (6-12px) for better visibility
+              const dotSize = (isActive || isHovered) ? 10 : Math.max(6, Math.min(12, (location.visits / maxVisits) * 12));
+              
+              return (
+                <Marker key={`${location.code}-${idx}`} coordinates={location.coordinates}>
+                  {/* Main dot - darker colors for better contrast */}
+                  <circle
+                    r={dotSize}
+                    fill={(isActive || isHovered) ? '#d4a017' : '#1e3a8a'}
+                    fillOpacity={1}
+                    stroke={(isActive || isHovered) ? '#001d3d' : '#3b82f6'}
+                    strokeWidth={(isActive || isHovered) ? 3 : 2}
+                    className={(isActive || isHovered) ? 'animate-pulse' : ''}
+                  />
+                  {/* Pulse effect for active dot */}
+                  {(isActive || isHovered) && (
+                    <>
+                      <circle
+                        r={dotSize * 2.5}
+                        fill="none"
+                        stroke="#d4a017"
+                        strokeWidth={1.5}
+                        opacity={0.5}
+                        className="animate-ping"
+                      />
+                      <circle
+                        r={dotSize * 1.5}
+                        fill="#d4a017"
+                        opacity={0.3}
+                      />
+                    </>
+                  )}
+                </Marker>
+              );
+            })}
+          </ZoomableGroup>
+        </ComposableMap>
+      </div>
+
+      {/* Zoom Controls */}
+      <div className="absolute top-4 right-4 flex flex-col gap-1.5 z-10">
+        <button
+          onClick={handleZoomIn}
+          className="w-8 h-8 rounded-lg bg-white/95 hover:bg-white border border-gray-200 shadow-sm flex items-center justify-center text-gray-600 hover:text-[#001d3d] transition-all hover:scale-105"
+          title="Zoom in"
+        >
+          <span className="text-lg font-medium leading-none">+</span>
+        </button>
+        <button
+          onClick={handleZoomOut}
+          className="w-8 h-8 rounded-lg bg-white/95 hover:bg-white border border-gray-200 shadow-sm flex items-center justify-center text-gray-600 hover:text-[#001d3d] transition-all hover:scale-105"
+          title="Zoom out"
+        >
+          <span className="text-lg font-medium leading-none">−</span>
+        </button>
+        <button
+          onClick={handleReset}
+          className="w-8 h-8 rounded-lg bg-white/95 hover:bg-white border border-gray-200 shadow-sm flex items-center justify-center text-gray-600 hover:text-[#001d3d] transition-all hover:scale-105"
+          title="Reset view"
+        >
+          <Globe className="w-4 h-4" />
+        </button>
+      </div>
+
+      {/* Color Legend - Compact */}
+      <div className="absolute bottom-4 left-4 bg-white/95 backdrop-blur-sm rounded-xl px-3 py-2.5 shadow-lg border border-gray-100 z-10">
+        <p className="text-[9px] font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Live Activity</p>
+        <div className="flex items-center gap-2">
+          <div className="w-3 h-3 rounded-full bg-[#1e3a8a] border-2 border-[#3b82f6] animate-pulse"></div>
+          <span className="text-[10px] text-gray-600">Active readers rotating</span>
+        </div>
+      </div>
+
+      {/* Stats Badge - Compact */}
+      {countries.length > 0 && (
+        <div className="absolute top-4 left-4 bg-white/95 backdrop-blur-sm rounded-xl px-3 py-2 shadow-lg border border-gray-100 z-10">
+          <div className="flex items-center gap-2.5">
+            <div className="flex items-center gap-1">
+              <MapPin className="w-3 h-3 text-[#001d3d]" />
+              <span className="text-xs font-bold text-[#001d3d]">{countries.length}</span>
+              <span className="text-[9px] text-gray-500">countries</span>
+            </div>
+            <div className="w-px h-3 bg-gray-200" />
+            <div className="flex items-center gap-1">
+              <Users className="w-3 h-3 text-[#3b82f6]" />
+              <span className="text-xs font-bold text-[#3b82f6]">
+                {formatNumber(countries.reduce((sum, c) => sum + (c.nb_visits || 0), 0))}
+              </span>
+              <span className="text-[9px] text-gray-500">visits</span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Tooltip */}
+      {tooltipData && (
+        <div
+          className="fixed z-50 pointer-events-none animate-fade-in"
+          style={{
+            left: tooltipData.x + 12,
+            top: tooltipData.y - 8,
+          }}
+        >
+          <div className="bg-white rounded-xl shadow-2xl border border-gray-100 p-3.5 min-w-[160px]">
+            <div className="flex items-center gap-2.5 mb-2.5 pb-2 border-b border-gray-100">
+              <span className="text-xl">{getCountryFlag(tooltipData.countryCode)}</span>
+              <p className="font-bold text-[#001d3d] text-sm leading-tight">{tooltipData.name}</p>
+            </div>
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between">
+                <span className="flex items-center gap-1 text-[10px] text-gray-500">
+                  <Eye className="w-2.5 h-2.5" />
+                  Visits
+                </span>
+                <span className="text-xs font-bold text-[#001d3d]">{tooltipData.visits.toLocaleString()}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="flex items-center gap-1 text-[10px] text-gray-500">
+                  <Users className="w-2.5 h-2.5" />
+                  Visitors
+                </span>
+                <span className="text-xs font-bold text-[#001d3d]">{tooltipData.visitors.toLocaleString()}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="flex items-center gap-1 text-[10px] text-gray-500">
+                  <Clock className="w-2.5 h-2.5" />
+                  Actions
+                </span>
+                <span className="text-xs font-bold text-[#001d3d]">{tooltipData.actions.toLocaleString()}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
-export default WorldMap;
+export default memo(WorldMap);

@@ -498,3 +498,83 @@ export async function testMatomoConnection(): Promise<{ connected: boolean; mess
     return { connected: false, message: `Failed to connect: ${error instanceof Error ? error.message : 'Unknown error'}` };
   }
 }
+
+/* ══════════════════════════════════════════════════════════════════
+   Downloads Tracking (requires Matomo Downloads tracking enabled)
+   ══════════════════════════════════════════════════════════════════ */
+
+/** Download event data */
+export interface MatomoDownload {
+  label: string;
+  nb_visits: number;
+  nb_hits: number;
+  nb_uniq_visitors?: number;
+  sum_time_spent: number;
+  url: string;
+  segment?: string;
+}
+
+/**
+ * Fetch file downloads data
+ * Requires Downloads & Outlinks tracking enabled in Matomo
+ */
+export async function getDownloads(period: string = 'day', date: string = 'today', limit: number = 50): Promise<MatomoDownload[]> {
+  try {
+    const result = await matomoFetch<MatomoDownload[] | { result: string }>('Actions.getDownloads', {
+      period,
+      date,
+      filter_limit: limit,
+      expanded: '1',
+    });
+    
+    // Handle empty result or error
+    if (!result || (typeof result === 'object' && 'result' in result)) {
+      return [];
+    }
+    
+    return Array.isArray(result) ? result : [];
+  } catch (error) {
+    console.warn('[Matomo] Downloads tracking may not be enabled:', error);
+    return [];
+  }
+}
+
+/**
+ * Get real-time downloads from recent visitors' actions
+ * Filters actions for download events
+ */
+export async function getRealtimeDownloads(lastMinutes: number = 30): Promise<{ filename: string; url: string; timestamp: number; country: string; countryCode: string }[]> {
+  try {
+    const visitors = await getLastVisitorsDetails(100);
+    
+    const downloads: { filename: string; url: string; timestamp: number; country: string; countryCode: string }[] = [];
+    
+    visitors.forEach(visitor => {
+      (visitor.actionDetails || []).forEach(action => {
+        // Check if action is a download (type 'download' or URL contains download indicators)
+        if (action.type === 'download' || 
+            action.url?.includes('/download/') || 
+            action.url?.includes('.pdf') ||
+            action.url?.match(/\.(pdf|doc|docx|xls|xlsx|zip|rar|tar|gz)(\?|$)/i)) {
+          
+          // Extract filename from URL
+          const filename = action.url?.split('/').pop()?.split('?')[0] || 'Unknown file';
+          
+          downloads.push({
+            filename,
+            url: action.url,
+            timestamp: action.timestamp,
+            country: visitor.country,
+            countryCode: visitor.countryCode,
+          });
+        }
+      });
+    });
+    
+    // Sort by most recent
+    return downloads.sort((a, b) => b.timestamp - a.timestamp);
+  } catch (error) {
+    console.warn('[Matomo] Error fetching realtime downloads:', error);
+    return [];
+  }
+}

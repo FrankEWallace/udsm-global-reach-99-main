@@ -5,6 +5,7 @@
 import { Users, Globe, Monitor, Smartphone, Tablet, Clock, Eye, MapPin, Activity } from "lucide-react";
 import { useMatomoRealtime, useMatomoLiveCounters } from "@/hooks/useMatomoData";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import type { MatomoVisitor } from "@/services/matomoApi";
 
 // Country flag helper
@@ -44,41 +45,52 @@ const formatTimeAgo = (timestamp: number) => {
 // Single visitor row component
 const VisitorRow = ({ visitor, index }: { visitor: MatomoVisitor; index: number }) => {
   const lastAction = visitor.actionDetails?.[0];
-  const pageTitle = lastAction?.pageTitle || lastAction?.title || 'Unknown page';
+  const pageTitle = lastAction?.pageTitle || lastAction?.title || 'Browsing';
+  const countryName = visitor.country || 'Unknown';
+  const flag = getCountryFlag(visitor.countryCode);
   
   return (
     <div 
       className="flex items-center gap-3 p-3 bg-gradient-to-r from-green-50/50 to-transparent rounded-lg hover:from-green-50 transition-colors animate-slide-in-right"
       style={{ animationDelay: `${index * 60}ms` }}
     >
-      {/* Country flag */}
-      <div className="flex-shrink-0 text-xl" title={visitor.country}>
-        {getCountryFlag(visitor.countryCode)}
+      {/* Country flag - larger and more prominent */}
+      <div className="flex-shrink-0 w-10 h-10 flex items-center justify-center text-2xl bg-white rounded-full shadow-sm border border-gray-100" title={countryName}>
+        {flag}
       </div>
       
       {/* Visitor info */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
-          <span className="text-sm font-medium text-foreground truncate">
-            {visitor.city || visitor.region || visitor.country || 'Unknown location'}
-          </span>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="text-sm font-semibold text-[#001d3d] truncate block">
+                Reader from {countryName}
+              </span>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Reader from {countryName}</p>
+            </TooltipContent>
+          </Tooltip>
+        </div>
+        <div className="flex items-center gap-2 mt-0.5">
           <span className="flex items-center gap-1 text-xs text-muted-foreground">
             {getDeviceIcon(visitor.deviceType)}
-            {visitor.browserName}
+            <Tooltip delayDuration={200}>
+              <TooltipTrigger asChild>
+                <span className="truncate max-w-[120px] cursor-help">{pageTitle}</span>
+              </TooltipTrigger>
+              <TooltipContent side="top" sideOffset={8} className="max-w-[300px] z-[9999] bg-gray-900 text-white px-3 py-2">
+                <p className="text-xs break-words whitespace-normal">{pageTitle}</p>
+              </TooltipContent>
+            </Tooltip>
           </span>
         </div>
-        <p className="text-xs text-muted-foreground truncate mt-0.5">
-          {pageTitle}
-        </p>
       </div>
       
-      {/* Time and actions */}
+      {/* Time */}
       <div className="flex-shrink-0 text-right">
-        <div className="flex items-center gap-1 text-xs text-green-600 font-medium">
-          <Activity className="w-3 h-3" />
-          {visitor.actionDetails?.length || 0}
-        </div>
-        <p className="text-xs text-muted-foreground mt-0.5">
+        <p className="text-xs font-medium text-green-600">
           {formatTimeAgo(visitor.lastActionTimestamp)}
         </p>
       </div>
@@ -123,6 +135,7 @@ const RealtimeVisitors = () => {
   }
 
   return (
+    <TooltipProvider>
     <div className="glass-card p-6 h-full">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
@@ -221,6 +234,7 @@ const RealtimeVisitors = () => {
         </div>
       )}
     </div>
+    </TooltipProvider>
   );
 };
 

@@ -1,4 +1,5 @@
-import { BookOpen, Globe2, GraduationCap } from "lucide-react";
+import { BookOpen, Globe2, GraduationCap, Sparkles } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const Header = () => {
   return (
@@ -24,6 +25,13 @@ const Header = () => {
 
           {/* Right side */}
           <div className="flex items-center gap-6">
+            <Link
+              to="/insights"
+              className="hidden md:flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-[hsl(210,100%,20%)] to-[hsl(210,70%,30%)] text-white text-sm font-medium hover:shadow-lg hover:shadow-blue-900/20 transition-all duration-200"
+            >
+              <Sparkles className="w-4 h-4 text-[hsl(42,100%,65%)]" />
+              <span>Insights</span>
+            </Link>
             <div className="hidden md:flex items-center gap-2 text-sm text-muted-foreground">
               <Globe2 className="w-4 h-4 text-[hsl(210,100%,20%)]" />
               <span className="font-medium">University of Dar es Salaam</span>

@@ -528,6 +528,7 @@ export async function triggerCitationFetch(
     onlyMissing?: boolean;
     limit?: number;
     email?: string;
+    jwtToken?: string;
   }
 ): Promise<FetchCitationsResponse> {
   const params = new URLSearchParams();
@@ -537,14 +538,32 @@ export async function triggerCitationFetch(
   
   const url = buildFastStatsUrl(journalPath, 'citations/fetch', params);
   
+  // Use custom JWT token if provided, otherwise use default auth headers
+  const headers = options?.jwtToken 
+    ? {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${options.jwtToken}`,
+      }
+    : getAuthHeaders();
+  
   const res = await fetch(url, {
     method: 'POST',
-    headers: getAuthHeaders(),
+    headers,
   });
   
   if (!res.ok) {
     const text = await res.text();
     throw new Error(`Citation fetch failed: ${res.status} - ${text}`);
+  }
+  
+  // Check if response is actually JSON
+  const contentType = res.headers.get('content-type');
+  if (!contentType || !contentType.includes('application/json')) {
+    const text = await res.text();
+    // Extract meaningful error from HTML if possible
+    const match = text.match(/<b>(.+?)<\/b>/);
+    const errorMsg = match ? match[1] : text.substring(0, 200);
+    throw new Error(`Server returned HTML instead of JSON. Error: ${errorMsg}`);
   }
   
   return res.json();
@@ -635,6 +654,7 @@ export async function triggerOpenAlexFetch(
     onlyMissing?: boolean;
     email?: string;
     includeWithDoi?: boolean;
+    jwtToken?: string;
   }
 ): Promise<FetchOpenAlexResponse> {
   const params = new URLSearchParams();
@@ -646,14 +666,32 @@ export async function triggerOpenAlexFetch(
   
   const url = buildFastStatsUrl(journalPath, 'citations/fetch-openalex', params);
   
+  // Use custom JWT token if provided, otherwise use default auth headers
+  const headers = options?.jwtToken 
+    ? {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${options.jwtToken}`,
+      }
+    : getAuthHeaders();
+  
   const res = await fetch(url, {
     method: 'POST',
-    headers: getAuthHeaders(),
+    headers,
   });
   
   if (!res.ok) {
     const text = await res.text();
     throw new Error(`OpenAlex fetch failed: ${res.status} - ${text}`);
+  }
+  
+  // Check if response is actually JSON
+  const contentType = res.headers.get('content-type');
+  if (!contentType || !contentType.includes('application/json')) {
+    const text = await res.text();
+    // Extract meaningful error from HTML if possible
+    const match = text.match(/<b>(.+?)<\/b>/);
+    const errorMsg = match ? match[1] : text.substring(0, 200);
+    throw new Error(`Server returned HTML instead of JSON. Error: ${errorMsg}`);
   }
   
   return res.json();
@@ -679,7 +717,12 @@ export async function fetchFastStatsAggregated(
  */
 export async function fetchFastStatsJournals(journalPath: string): Promise<FastStatsJournalStats[]> {
   const url = buildFastStatsUrl(journalPath, 'journals');
-  return fetchWithTimeout<FastStatsJournalStats[]>(url);
+  const response = await fetchWithTimeout<{ items: FastStatsJournalStats[]; itemsMax: number } | FastStatsJournalStats[]>(url);
+  // Handle both { items: [...] } and direct array format
+  if (response && typeof response === 'object' && 'items' in response) {
+    return response.items;
+  }
+  return Array.isArray(response) ? response : [];
 }
 
 /**
