@@ -123,7 +123,7 @@ const RealtimeVisitors = () => {
       <div className="glass-card p-6 h-full">
         <div className="flex items-center gap-2 mb-4">
           <Users className="w-5 h-5 text-red-500" />
-          <h3 className="font-display text-lg font-semibold text-foreground">Real-time Visitors</h3>
+          <h3 className="font-heading text-lg font-semibold text-foreground">Real-time Visitors</h3>
         </div>
         <div className="text-center py-8 text-muted-foreground">
           <Globe className="w-10 h-10 mx-auto mb-3 opacity-30" />
@@ -140,8 +140,8 @@ const RealtimeVisitors = () => {
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <Users className="w-5 h-5 text-[hsl(210,100%,20%)]" />
-          <h3 className="font-display text-lg font-semibold text-foreground">Real-time Visitors</h3>
+          <Users className="w-5 h-5 text-primary" />
+          <h3 className="font-heading text-lg font-semibold text-foreground">Real-time Visitors</h3>
         </div>
         <div className="live-indicator">
           <span>Live</span>

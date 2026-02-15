@@ -26,8 +26,8 @@ const JournalStats = ({ editorialStats, userStats, daysToDecision, submissionsAc
       {/* Editorial Statistics */}
       <div className="glass-card p-6">
         <div className="flex items-center gap-2 mb-6">
-          <FileCheck className="w-5 h-5 text-[hsl(210,100%,20%)]" />
-          <h3 className="font-display text-xl font-semibold text-foreground">
+          <FileCheck className="w-5 h-5 text-primary" />
+          <h3 className="font-heading text-xl font-semibold text-foreground">
             Editorial Statistics
           </h3>
         </div>
@@ -74,8 +74,8 @@ const JournalStats = ({ editorialStats, userStats, daysToDecision, submissionsAc
       {/* User Statistics */}
       <div className="glass-card p-6">
         <div className="flex items-center gap-2 mb-6">
-          <Users className="w-5 h-5 text-[hsl(210,100%,20%)]" />
-          <h3 className="font-display text-xl font-semibold text-foreground">
+          <Users className="w-5 h-5 text-primary" />
+          <h3 className="font-heading text-xl font-semibold text-foreground">
             User Statistics
           </h3>
         </div>
@@ -94,7 +94,7 @@ const JournalStats = ({ editorialStats, userStats, daysToDecision, submissionsAc
                 <div key={user.key} className="animate-fade-in" style={{ animationDelay: `${idx * 80}ms` }}>
                   <div className="flex items-center justify-between mb-1">
                     <div className="flex items-center gap-2">
-                      <span className="text-[hsl(210,100%,20%)]">{statIcons[user.key] || <Users className="w-4 h-4" />}</span>
+                      <span className="text-primary">{statIcons[user.key] || <Users className="w-4 h-4" />}</span>
                       <span className="text-sm font-medium text-foreground">{user.name}</span>
                     </div>
                     <span className="text-sm font-semibold text-foreground">{user.value.toLocaleString()}</span>
@@ -115,7 +115,7 @@ const JournalStats = ({ editorialStats, userStats, daysToDecision, submissionsAc
             {/* Total */}
             <div className="mt-4 pt-4 border-t border-border flex items-center justify-between">
               <span className="text-sm font-medium text-muted-foreground">Total Users</span>
-              <span className="text-lg font-bold text-[hsl(210,100%,20%)]">
+              <span className="text-lg font-bold text-primary">
                 {users.reduce((s, u) => s + u.value, 0).toLocaleString()}
               </span>
             </div>

@@ -1,74 +1,87 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap');
 @import 'leaflet/dist/leaflet.css';
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* UDSM Global Readership Dashboard — Light Theme Design System */
+/* UDSM Journal Analytics Dashboard — Design System v1.0 */
 
 @layer base {
   :root {
-    /* UDSM Brand */
-    --udsm-blue: 210 100% 20%;
-    --udsm-blue-light: 210 70% 45%;
-    --udsm-gold: 42 100% 50%;
-    --udsm-gold-light: 42 100% 65%;
+    /* UDSM Primary Brand Colors */
+    --udsm-blue: 221 70% 47%;        /* #235dcb - New UDSM Blue */
+    --udsm-blue-light: 221 70% 57%;  /* Lighter variant */
+    --udsm-navy: 221 70% 20%;        /* Dark navy variant */
+    --udsm-navy-mid: 221 70% 30%;    /* Mid navy variant */
+    --udsm-gold: 221 70% 47%;        /* Same as blue */
+    --udsm-gold-light: 221 70% 57%;  /* Same as blue light */
 
     /* Light Theme */
-    --background: 210 20% 98%;
-    --foreground: 215 25% 15%;
+    --background: 210 20% 97%;       /* Off-white */
+    --foreground: 213 35% 15%;       /* Dark blue-gray text */
 
-    --card: 0 0% 100%;
-    --card-foreground: 215 25% 15%;
+    --card: 0 0% 100%;               /* White */
+    --card-foreground: 213 35% 15%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 215 25% 15%;
+    --popover-foreground: 213 35% 15%;
 
-    --primary: 210 100% 20%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 221 70% 47%;          /* New UDSM Blue #235dcb */
+    --primary-foreground: 0 0% 100%; /* White text */
 
-    --secondary: 42 100% 50%;
-    --secondary-foreground: 215 25% 10%;
+    --secondary: 221 70% 47%;        /* Same as primary */
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: 210 15% 94%;
-    --muted-foreground: 215 15% 48%;
+    --muted: 210 20% 95%;            /* Subtle gray */
+    --muted-foreground: 213 15% 50%; /* Gray text */
 
-    --accent: 210 20% 93%;
-    --accent-foreground: 215 25% 15%;
+    --accent: 221 70% 47%;           /* Same as primary */
+    --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 84% 60%;
+    --destructive: 0 72% 51%;        /* Red */
     --destructive-foreground: 0 0% 100%;
 
-    --border: 210 15% 90%;
-    --input: 210 15% 90%;
-    --ring: 210 100% 20%;
+    --border: 210 20% 90%;           /* Light gray border */
+    --input: 210 20% 90%;
+    --ring: 221 70% 47%;             /* New UDSM Blue ring */
 
-    --radius: 0.625rem;
+    --radius: 0.5rem;                /* 8px base radius */
 
     /* Dashboard specific */
-    --glow-gold: 0 0 20px hsl(42 100% 50% / 0.15);
-    --glow-blue: 0 0 20px hsl(210 100% 40% / 0.12);
-    --gradient-gold: linear-gradient(135deg, hsl(42 100% 50%) 0%, hsl(42 100% 65%) 100%);
-    --gradient-blue: linear-gradient(135deg, hsl(210 100% 20%) 0%, hsl(210 70% 45%) 100%);
+    --glow-gold: 0 0 20px hsl(221 70% 47% / 0.15);
+    --glow-blue: 0 0 20px hsl(221 70% 47% / 0.12);
+    --gradient-gold: linear-gradient(135deg, hsl(221 70% 47%) 0%, hsl(221 70% 57%) 100%);
+    --gradient-blue: linear-gradient(135deg, hsl(221 70% 47%) 0%, hsl(221 70% 57%) 100%);
 
-    /* Map colors — light */
+    /* Map colors */
     --map-bg: 210 20% 96%;
     --map-land: 210 15% 88%;
     --map-border: 210 10% 80%;
-    --heat-low: 210 60% 60%;
-    --heat-medium: 42 100% 50%;
-    --heat-high: 15 90% 52%;
+    --heat-low: 221 70% 67%;
+    --heat-medium: 221 70% 47%;      /* New UDSM Blue */
+    --heat-high: 221 70% 30%;
 
-    /* Sidebar */
-    --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 215 25% 15%;
-    --sidebar-primary: 210 100% 20%;
+    /* Sidebar - UDSM Navy Gradient */
+    --sidebar-background: 221 70% 20%;              /* Dark blue navy */
+    --sidebar-foreground: 210 20% 85%;              /* Light text */
+    --sidebar-primary: 221 70% 57%;                 /* Bright blue for active */
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 210 20% 96%;
-    --sidebar-accent-foreground: 215 25% 15%;
-    --sidebar-border: 210 15% 90%;
-    --sidebar-ring: 210 100% 40%;
+    --sidebar-accent: 221 70% 30%;                  /* Dark accent */
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 221 60% 25%;                  /* Border */
+    --sidebar-ring: 221 70% 47%;
+    
+    /* Success/Warning colors */
+    --success: 152 60% 42%;          /* Green #10B981 */
+    --warning: 38 92% 50%;           /* Amber #F59E0B */
+    
+    /* Chart colors */
+    --chart-1: 221 70% 47%;          /* New UDSM Blue */
+    --chart-2: 221 70% 57%;          /* Lighter */
+    --chart-3: 221 70% 37%;          /* Darker */
+    --chart-4: 221 70% 67%;          /* Very Light */
+    --chart-5: 221 70% 27%;          /* Very Dark */
   }
 }
 
@@ -77,12 +90,20 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground font-sans antialiased;
+    @apply bg-background text-foreground antialiased;
     font-family: 'Inter', system-ui, sans-serif;
   }
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Playfair Display', serif;
+    font-family: 'Source Serif 4', 'Georgia', serif;
   }
+  
+  /* Typography scale */
+  h1 { @apply text-4xl font-bold; }      /* 36px / 2.25rem */
+  h2 { @apply text-3xl font-semibold; }  /* 30px / 1.875rem */
+  h3 { @apply text-2xl font-semibold; }  /* 24px / 1.5rem */
+  h4 { @apply text-xl font-medium; }     /* 20px / 1.25rem */
+  h5 { @apply text-lg font-medium; }     /* 18px / 1.125rem */
+  h6 { @apply text-base font-medium; }   /* 16px / 1rem */
 }
 
 /* Component classes */

@@ -14,8 +14,8 @@ const TopCountries = ({ publications }: TopCountriesProps) => {
     <div className="glass-card p-6 h-full">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
-          <BarChart3 className="w-5 h-5 text-[hsl(210,100%,20%)]" />
-          <h3 className="font-display text-xl font-semibold text-foreground">
+          <BarChart3 className="w-5 h-5 text-primary" />
+          <h3 className="font-heading text-xl font-semibold text-foreground">
             Top Publications
           </h3>
         </div>
@@ -40,7 +40,7 @@ const TopCountries = ({ publications }: TopCountriesProps) => {
               >
                 <div className="flex items-start justify-between mb-1.5 gap-4">
                   <div className="flex items-start gap-2 min-w-0 flex-1">
-                    <span className="text-xs font-bold text-[hsl(210,100%,20%)] bg-[hsl(210,100%,20%,0.08)] rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <span className="text-xs font-bold text-primary bg-[hsl(210,100%,20%,0.08)] rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 mt-0.5">
                       {index + 1}
                     </span>
                     <div className="min-w-0">

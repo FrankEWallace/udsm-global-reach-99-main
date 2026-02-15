@@ -20,7 +20,7 @@ const MetricCard = ({
   prefix = "",
   trend,
   delay = 0,
-  accentColor = "hsl(42, 100%, 50%)",
+  accentColor = "hsl(221, 70%, 47%)", // New UDSM Blue #235dcb
 }: MetricCardProps) => {
   return (
     <div
@@ -37,7 +37,7 @@ const MetricCard = ({
           <span className="text-muted-foreground text-sm font-medium uppercase tracking-wider">
             {title}
           </span>
-          <div className="p-2 rounded-lg bg-muted text-[hsl(210,100%,20%)] group-hover:bg-[hsl(210,100%,20%)] group-hover:text-white transition-colors">
+          <div className="p-2 rounded-lg bg-muted text-primary group-hover:bg-primary group-hover:text-white transition-colors">
             {icon}
           </div>
         </div>
@@ -55,7 +55,7 @@ const MetricCard = ({
 
         {trend && (
           <div className="flex items-center gap-1.5">
-            <span className={`text-sm font-medium ${trend.positive ? "text-green-600" : "text-red-500"}`}>
+            <span className={`text-sm font-medium ${trend.positive ? "text-emerald-600" : "text-red-600"}`}>
               {trend.positive ? "+" : ""}{Math.abs(trend.value)}%
             </span>
             <span className="text-xs text-muted-foreground">vs last month</span>

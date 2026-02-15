@@ -12,6 +12,14 @@ export default {
         "2xl": "1400px",
       },
     },
+    screens: {
+      'xs': '475px',
+      'sm': '640px',
+      'md': '768px',
+      'lg': '1024px',
+      'xl': '1280px',
+      '2xl': '1536px',
+    },
     extend: {
       colors: {
         border: "hsl(var(--border))",
@@ -60,9 +68,13 @@ export default {
         udsm: {
           blue: "hsl(var(--udsm-blue))",
           "blue-light": "hsl(var(--udsm-blue-light))",
+          navy: "hsl(var(--udsm-navy))",
+          "navy-mid": "hsl(var(--udsm-navy-mid))",
           gold: "hsl(var(--udsm-gold))",
           "gold-light": "hsl(var(--udsm-gold-light))",
         },
+        success: "hsl(var(--success))",
+        warning: "hsl(var(--warning))",
         heat: {
           low: "hsl(var(--heat-low))",
           medium: "hsl(var(--heat-medium))",
@@ -73,10 +85,19 @@ export default {
           land: "hsl(var(--map-land))",
           border: "hsl(var(--map-border))",
         },
+        chart: {
+          1: "hsl(var(--chart-1))",
+          2: "hsl(var(--chart-2))",
+          3: "hsl(var(--chart-3))",
+          4: "hsl(var(--chart-4))",
+          5: "hsl(var(--chart-5))",
+        },
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
-        display: ['Playfair Display', 'serif'],
+        body: ['Inter', 'system-ui', 'sans-serif'],
+        heading: ['Source Serif 4', 'Georgia', 'serif'],
+        display: ['Source Serif 4', 'Georgia', 'serif'],
       },
       borderRadius: {
         lg: "var(--radius)",

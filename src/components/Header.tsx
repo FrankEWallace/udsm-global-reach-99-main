@@ -9,11 +9,15 @@ const Header = () => {
           {/* Logo & Title */}
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-xl bg-[hsl(210,100%,20%)] shadow-md">
-                <GraduationCap className="w-6 h-6 text-white" />
+              <div className="w-14 h-14 rounded-full bg-white shadow-lg flex items-center justify-center border border-gray-200 p-1">
+                <img 
+                  src="/udsm-logo.png" 
+                  alt="UDSM Coat of Arms" 
+                  className="w-full h-full object-contain"
+                />
               </div>
               <div>
-                <h1 className="font-display text-xl font-bold text-[hsl(210,100%,20%)]">
+                <h1 className="font-heading text-xl font-bold text-udsm-blue">
                   UDSM <span className="text-gradient-gold">Journals</span>
                 </h1>
                 <p className="text-xs text-muted-foreground font-medium tracking-wide">
@@ -27,20 +31,20 @@ const Header = () => {
           <div className="flex items-center gap-6">
             <Link
               to="/insights"
-              className="hidden md:flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-[hsl(210,100%,20%)] to-[hsl(210,70%,30%)] text-white text-sm font-medium hover:shadow-lg hover:shadow-blue-900/20 transition-all duration-200"
+              className="hidden md:flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-udsm-blue to-udsm-blue-light text-white text-sm font-medium hover:shadow-lg hover:shadow-primary/20 transition-all duration-200"
             >
-              <Sparkles className="w-4 h-4 text-[hsl(42,100%,65%)]" />
+              <Sparkles className="w-4 h-4 text-udsm-gold" />
               <span>Insights</span>
             </Link>
             <div className="hidden md:flex items-center gap-2 text-sm text-muted-foreground">
-              <Globe2 className="w-4 h-4 text-[hsl(210,100%,20%)]" />
+              <Globe2 className="w-4 h-4 text-udsm-blue" />
               <span className="font-medium">University of Dar es Salaam</span>
             </div>
             <div className="hidden md:flex items-center gap-2 text-sm text-muted-foreground">
-              <BookOpen className="w-4 h-4 text-[hsl(42,100%,50%)]" />
+              <BookOpen className="w-4 h-4 text-udsm-gold" />
               <span>OJS Analytics</span>
             </div>
-            <div className="live-indicator px-3 py-1.5 rounded-full bg-green-50 border border-green-200">
+            <div className="live-indicator px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-200">
               <span>Live</span>
             </div>
           </div>

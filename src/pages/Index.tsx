@@ -93,13 +93,13 @@ const Index = () => {
 
           {/* Title */}
           <div className="text-center mb-8 md:mb-10">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[hsl(210,100%,20%,0.06)] border border-[hsl(210,100%,20%,0.12)] mb-4">
-              <GraduationCap className="w-4 h-4 text-[hsl(210,100%,20%)]" />
-              <span className="text-sm font-medium text-[hsl(210,100%,20%)]">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/5 border border-primary/10 mb-4">
+              <GraduationCap className="w-4 h-4 text-primary" />
+              <span className="text-sm font-medium text-primary">
                 OJS Analytics Dashboard
               </span>
             </div>
-            <h2 className="font-display text-3xl md:text-5xl font-bold text-foreground mb-4">
+            <h2 className="font-heading text-3xl md:text-5xl font-bold text-foreground mb-4">
               UDSM Research <span className="text-gradient-gold">Global Impact</span>
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
@@ -121,7 +121,7 @@ const Index = () => {
           {selectedJournalId && metrics && (
             <div className="text-center mb-6">
               <p className="text-sm text-muted-foreground">
-                Showing statistics for: <span className="font-semibold text-[hsl(210,100%,20%)]">
+                Showing statistics for: <span className="font-semibold text-primary">
                   {contexts.find(c => c.id === selectedJournalId)?.name?.en_US || `Journal ${selectedJournalId}`}
                 </span>
               </p>
@@ -130,7 +130,7 @@ const Index = () => {
           {!selectedJournalId && contexts.length > 1 && (
             <div className="text-center mb-6">
               <p className="text-sm text-muted-foreground">
-                Showing aggregated statistics from <span className="font-semibold text-[hsl(210,100%,20%)]">{contexts.length} journals</span>
+                Showing aggregated statistics from <span className="font-semibold text-primary">{contexts.length} journals</span>
               </p>
             </div>
           )}
@@ -200,9 +200,9 @@ const Index = () => {
               <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3">
                 <div className="glass-card p-4 text-center">
                   <div className="flex items-center justify-center gap-1 mb-1">
-                    <Send className="w-4 h-4 text-[hsl(210,100%,20%)]" />
+                    <Send className="w-4 h-4 text-primary" />
                   </div>
-                  <p className="text-2xl font-bold text-[hsl(210,100%,20%)]">{metrics.totalSubmissions || 0}</p>
+                  <p className="text-2xl font-bold text-primary">{metrics.totalSubmissions || 0}</p>
                   <p className="text-xs text-muted-foreground font-medium mt-1">Total Submissions</p>
                 </div>
                 <div className="glass-card p-4 text-center">
@@ -250,7 +250,7 @@ const Index = () => {
               <h3 className="text-sm font-semibold text-muted-foreground mb-3 px-1">Editorial Activity (All-Time)</h3>
               <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
                 <div className="glass-card p-4 text-center">
-                  <p className="text-2xl font-bold text-[hsl(210,100%,20%)]">{metrics.submissionsReceived || 0}</p>
+                  <p className="text-2xl font-bold text-primary">{metrics.submissionsReceived || 0}</p>
                   <p className="text-xs text-muted-foreground font-medium mt-1">Received</p>
                 </div>
                 <div className="glass-card p-4 text-center">
@@ -280,7 +280,7 @@ const Index = () => {
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {metrics.usersByRole.slice(0, 8).map((role) => (
                   <div key={role.roleId} className="text-center">
-                    <p className="text-xl font-bold text-[hsl(210,70%,45%)]">{role.count}</p>
+                    <p className="text-xl font-bold text-udsm-blue-light">{role.count}</p>
                     <p className="text-xs text-muted-foreground mt-1">{role.roleName}</p>
                   </div>
                 ))}
@@ -293,16 +293,16 @@ const Index = () => {
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8 md:mb-10">
               <div className="glass-card p-4 text-center">
                 <div className="flex items-center justify-center gap-1 mb-1">
-                  <Edit className="w-4 h-4 text-[hsl(42,100%,45%)]" />
+                  <Edit className="w-4 h-4 text-udsm-gold" />
                 </div>
-                <p className="text-2xl font-bold text-[hsl(42,100%,45%)]">{findRoleCount('author')}</p>
+                <p className="text-2xl font-bold text-udsm-gold">{findRoleCount('author')}</p>
                 <p className="text-xs text-muted-foreground font-medium mt-1">Authors</p>
               </div>
               <div className="glass-card p-4 text-center">
                 <div className="flex items-center justify-center gap-1 mb-1">
-                  <UserCheck className="w-4 h-4 text-[hsl(210,70%,45%)]" />
+                  <UserCheck className="w-4 h-4 text-udsm-blue-light" />
                 </div>
-                <p className="text-2xl font-bold text-[hsl(210,70%,45%)]">{findRoleCount('reviewer')}</p>
+                <p className="text-2xl font-bold text-udsm-blue-light">{findRoleCount('reviewer')}</p>
                 <p className="text-xs text-muted-foreground font-medium mt-1">Reviewers</p>
               </div>
               <div className="glass-card p-4 text-center">
@@ -326,8 +326,8 @@ const Index = () => {
           {!isLoading && metrics && (
             <div className="glass-card p-6 mb-8 md:mb-10">
               <div className="flex items-center gap-2 mb-4">
-                <Quote className="w-5 h-5 text-[hsl(210,100%,20%)]" />
-                <h3 className="font-display text-lg font-semibold text-foreground">Citation Metrics</h3>
+                <Quote className="w-5 h-5 text-primary" />
+                <h3 className="font-heading text-lg font-semibold text-foreground">Citation Metrics</h3>
                 {metrics.allCitations && (
                   <span className="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full ml-2">
                     Crossref + OpenAlex
@@ -479,8 +479,8 @@ const Index = () => {
           {!isLoading && metrics && metrics.publicationsByYear?.length > 0 && (
             <div className="glass-card p-6 mb-8 md:mb-10">
               <div className="flex items-center gap-2 mb-4">
-                <BarChart3 className="w-5 h-5 text-[hsl(210,100%,20%)]" />
-                <h3 className="font-display text-lg font-semibold text-foreground">Publications by Year</h3>
+                <BarChart3 className="w-5 h-5 text-primary" />
+                <h3 className="font-heading text-lg font-semibold text-foreground">Publications by Year</h3>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-4">
                 {metrics.publicationsByYear.slice(0, 6).map((item) => (
@@ -497,8 +497,8 @@ const Index = () => {
           {!isLoading && metrics && metrics.publicationsBySection?.length > 0 && (
             <div className="glass-card p-6 mb-8 md:mb-10">
               <div className="flex items-center gap-2 mb-4">
-                <FileText className="w-5 h-5 text-[hsl(210,100%,20%)]" />
-                <h3 className="font-display text-lg font-semibold text-foreground">Publications by Section</h3>
+                <FileText className="w-5 h-5 text-primary" />
+                <h3 className="font-heading text-lg font-semibold text-foreground">Publications by Section</h3>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
                 {metrics.publicationsBySection.map((item) => (
@@ -517,8 +517,8 @@ const Index = () => {
             <div className="lg:col-span-2">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
-                  <Globe className="w-5 h-5 text-[hsl(210,100%,20%)]" />
-                  <h3 className="font-display text-xl md:text-2xl font-semibold text-foreground">
+                  <Globe className="w-5 h-5 text-primary" />
+                  <h3 className="font-heading text-xl md:text-2xl font-semibold text-foreground">
                     Global Readership Map
                   </h3>
                 </div>
@@ -555,8 +555,8 @@ const Index = () => {
                 {/* Recent Publications */}
                 <div className="glass-card p-6">
                   <div className="flex items-center gap-2 mb-4">
-                    <Clock className="w-5 h-5 text-[hsl(210,100%,20%)]" />
-                    <h3 className="font-display text-lg font-semibold text-foreground">Recent Publications</h3>
+                    <Clock className="w-5 h-5 text-primary" />
+                    <h3 className="font-heading text-lg font-semibold text-foreground">Recent Publications</h3>
                   </div>
                   <div className="space-y-3">
                     {metrics?.recentPublications?.slice(0, 5).map((pub) => (
@@ -582,8 +582,8 @@ const Index = () => {
           {/* Footer */}
           <footer className="mt-12 pt-8 border-t border-border text-center">
             <div className="flex items-center justify-center gap-2 mb-2">
-              <GraduationCap className="w-5 h-5 text-[hsl(210,100%,20%)]" />
-              <span className="font-display font-semibold text-foreground">
+              <GraduationCap className="w-5 h-5 text-primary" />
+              <span className="font-heading font-semibold text-foreground">
                 UDSM Journals Dashboard
               </span>
             </div>

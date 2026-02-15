@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 600">
+  <!-- This is a placeholder - the actual UDSM logo will be added -->
+  <ellipse cx="250" cy="250" rx="200" ry="250" fill="#F5B942" stroke="#235dcb" stroke-width="8"/>
+  <path d="M 100 220 Q 100 100 250 100 Q 400 100 400 220 L 400 350 Q 400 450 250 450 Q 100 450 100 350 Z" fill="#235dcb"/>
+  <ellipse cx="250" cy="350" rx="150" ry="100" fill="#2d6e4e"/>
+  <path d="M 220 180 L 230 350 L 240 180 L 250 350 L 260 180 L 270 350 L 280 180" stroke="white" stroke-width="4" fill="none"/>
+  <rect x="210" y="280" width="30" height="25" fill="white" stroke="#235dcb" stroke-width="2"/>
+  <line x1="220" y1="285" x2="220" y2="300" stroke="#235dcb" stroke-width="1"/>
+  <line x1="230" y1="285" x2="230" y2="300" stroke="#235dcb" stroke-width="1"/>
+  <path d="M 250 150 L 260 250 L 270 150 L 280 240 L 290 160" stroke="#ef4444" stroke-width="6" fill="none"/>
+  <path d="M 120 550 L 150 520 L 200 520 L 230 550 Z" fill="white" stroke="#F5B942" stroke-width="4"/>
+  <path d="M 270 550 L 300 520 L 350 520 L 380 550 Z" fill="white" stroke="#F5B942" stroke-width="4"/>
+  <path d="M 50 560 Q 250 540 450 560" fill="white" stroke="#F5B942" stroke-width="6"/>
+  <text x="250" y="590" font-family="serif" font-size="32" font-weight="bold" fill="#235dcb" text-anchor="middle">HEKIMA NI UHURU</text>
+</svg>

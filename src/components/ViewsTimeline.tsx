@@ -61,8 +61,8 @@ const ViewsTimeline = ({ abstractViews, galleyViews }: ViewsTimelineProps) => {
     <div className="glass-card p-6">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
-          <TrendingUp className="w-5 h-5 text-[hsl(210,100%,20%)]" />
-          <h3 className="font-display text-lg font-semibold text-foreground">
+          <TrendingUp className="w-5 h-5 text-primary" />
+          <h3 className="font-heading text-lg font-semibold text-foreground">
             Views Over Time
           </h3>
         </div>
